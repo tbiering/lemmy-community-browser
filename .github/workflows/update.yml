@@ -41,7 +41,7 @@ jobs:
       - name: List files in the public folder (before update)
         run: |
           ls -la ${{ github.workspace }}/public
-          shell: bash
+        shell: bash
       - name: Download updated communities file
         run: |
           curl -o ${{ github.workspace }}/dist/communities.json https://browse.feddit.de/communities.json?nocache=$(date +%s)
