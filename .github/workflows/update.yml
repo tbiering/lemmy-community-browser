@@ -1,0 +1,52 @@
+name: Update communities
+
+on:
+  # Run workflow automatically every day
+  schedule:
+    - cron: "0 0 * * *"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  # Single deploy job since we're just deploying
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: List files in the public folder (before update)
+        run: |
+          ls -la ${{ github.workspace }}/public
+      - name: Download updated communities file
+        run: |
+          curl -o ${{ github.workspace }}/public/communities.json https://browse.feddit.de/communities.json?nocache=$(date +%s)
+        shell: bash
+      - name: List files in the repository
+        run: |
+          ls -la ${{ github.workspace }}
+        shell: bash
+      - name: List files in the public folder
+        run: |
+          ls ${{ github.workspace }}/public
+      - name: Commit files # commit the new communities file
+        run: |
+          git config --local user.name  ${{ github.actor }}        
+          git config --local user.email "${{ github.actor }}@users.noreply.github.com"
+          git add ./public/communities.json
+          git commit -m "Updating the communities.json file"
+          git push
