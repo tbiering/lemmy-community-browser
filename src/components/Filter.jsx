@@ -15,8 +15,8 @@ function Filter({ column, table }) {
         className="w-20 border shadow rounded text-xs font-medium text-gray-500 uppercase"
       >
         <option value="">Any</option>
-        <option value={true}>True</option>
-        <option value={false}>False</option>
+        <option value={true}>Yes</option>
+        <option value={false}>No</option>
       </select>
     );
   }
