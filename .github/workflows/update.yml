@@ -1,4 +1,4 @@
-name: Update communities
+name: Deploy with updated communities file
 
 on:
   # Run workflow automatically every day
@@ -29,24 +29,34 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "npm"
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
       - name: List files in the public folder (before update)
         run: |
           ls -la ${{ github.workspace }}/public
+          shell: bash
       - name: Download updated communities file
         run: |
-          curl -o ${{ github.workspace }}/public/communities.json https://browse.feddit.de/communities.json?nocache=$(date +%s)
+          curl -o ${{ github.workspace }}/dist/communities.json https://browse.feddit.de/communities.json?nocache=$(date +%s)
         shell: bash
       - name: List files in the repository
         run: |
           ls -la ${{ github.workspace }}
         shell: bash
-      - name: List files in the public folder
-        run: |
-          ls ${{ github.workspace }}/public
-      - name: Commit files # commit the new communities file
-        run: |
-          git config --local user.name  ${{ github.actor }}        
-          git config --local user.email "${{ github.actor }}@users.noreply.github.com"
-          git add ./public/communities.json
-          git commit -m "Updating the communities.json file"
-          git push
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload dist repository
+          path: "${{ github.workspace }}/dist"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
