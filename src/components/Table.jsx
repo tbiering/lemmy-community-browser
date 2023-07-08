@@ -186,7 +186,7 @@ function Table() {
 
               {!loading && (
                 <>
-                  <table className="min-w-full divide-y divide-gray-200">
+                  <table className="min-w-full divide-y divide-gray-200 border-b border-gray-200">
                     <thead className="bg-gray-50">
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
@@ -195,14 +195,19 @@ function Table() {
                               <th
                                 key={header.id}
                                 colSpan={header.colSpan}
-                                className="px-6 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                {...{
+                                  className:
+                                    header.column.id === "name"
+                                      ? "w-2/5 px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                      : "px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
+                                }}
                               >
                                 {header.isPlaceholder ? null : (
                                   <div
                                     {...{
                                       className: header.column.getCanSort()
                                         ? "cursor-pointer select-none"
-                                        : "",
+                                        : "font-bold tracking-widest",
                                       onClick:
                                         header.column.getToggleSortingHandler(),
                                     }}
@@ -252,17 +257,27 @@ function Table() {
                         return (
                           <tr key={row.id}>
                             {row.getVisibleCells().map((cell) => {
-                              return (
-                                <td
-                                  key={cell.id}
-                                  className="px-6 py-2 whitespace-nowrap"
-                                >
-                                  {flexRender(
-                                    cell.column.columnDef.cell,
-                                    cell.getContext()
-                                  )}
-                                </td>
-                              );
+                              if (cell.column.id === "name") {
+                                return (
+                                  <td key={cell.id} className="px-3 py-2">
+                                    {flexRender(
+                                      cell.column.columnDef.cell,
+                                      cell.getContext()
+                                    )}
+                                  </td>
+                                );
+                              } else
+                                return (
+                                  <td
+                                    key={cell.id}
+                                    className="px-6 py-2 whitespace-pre-wrap"
+                                  >
+                                    {flexRender(
+                                      cell.column.columnDef.cell,
+                                      cell.getContext()
+                                    )}
+                                  </td>
+                                );
                             })}
                           </tr>
                         );
@@ -270,7 +285,7 @@ function Table() {
                     </tbody>
                   </table>
 
-                  <div className="px-6 py-2 flex items-center justify-between">
+                  <div className="px-3 py-2 flex items-center justify-between">
                     <div className="flex-1 flex justify-between sm:hidden ">
                       <Button
                         onClick={() => table.previousPage()}
