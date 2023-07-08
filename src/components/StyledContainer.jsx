@@ -16,6 +16,7 @@ function StyledContainer() {
           <span>
             <InformationCircleIcon className="inline-block w-4 h-4 mr-1 text-sky-500" />
           </span>
+          <span>Data is updated regularly via GitHub Actions.</span>
         </div>
         <br />
         <div className="inline-flex text-sm italic text-gray-700">

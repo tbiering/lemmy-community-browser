@@ -6,9 +6,7 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
   useReactTable,
-  sortingFns,
 } from "@tanstack/react-table";
-import { compareItems, rankItem } from "@tanstack/match-sorter-utils";
 
 import {
   ChevronDoubleLeftIcon,
@@ -17,19 +15,20 @@ import {
   ChevronDoubleRightIcon,
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/20/solid";
 import { Button, PageButton } from "./PaginationButtons";
 import BooleanDisplay from "./BooleanDisplay";
 import Filter from "./Filter";
 
-import communities from "../assets/communities.json";
 import CellCommunity from "./CellCommunity";
 import CellDefault from "./CellDefault";
 import CellNumber from "./CellNumber";
 
 function Table() {
-  const [data, setData] = useState(communities);
+  const [data, setData] = useState([]);
   const [sorting, setSorting] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const nameSort = (rowA, rowB) => {
     let dir = 1;
@@ -145,16 +144,14 @@ function Table() {
       })
       .then((data) => {
         setData(data);
+        setLoading(false);
       });
   };
 
-  /*
+  // Load data on mount
   useEffect(() => {
-    fetchData(
-      "https://browse.feddit.de/communities.json?nocache=1688797277754"
-    );
+    fetchData("./communities.json");
   }, []);
-  */
 
   const table = useReactTable({
     data,
@@ -167,7 +164,7 @@ function Table() {
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    debugTable: true,
+    debugTable: false,
   });
 
   return (
@@ -177,181 +174,198 @@ function Table() {
         <div className="-my-2 overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8">
           <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
             <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => {
-                        return (
-                          <th
-                            key={header.id}
-                            colSpan={header.colSpan}
-                            className="px-6 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                          >
-                            {header.isPlaceholder ? null : (
-                              <div
-                                {...{
-                                  className: header.column.getCanSort()
-                                    ? "cursor-pointer select-none"
-                                    : "",
-                                  onClick:
-                                    header.column.getToggleSortingHandler(),
-                                }}
+              {loading && (
+                <div className="text-center p-20 text-gray-900">
+                  <ArrowPathIcon
+                    className="animate-spin h-5 w-5 mr-2 inline-block text-gray-500"
+                    aria-hidden="true"
+                  />
+                  Loading communities...
+                </div>
+              )}
+
+              {!loading && (
+                <>
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                          {headerGroup.headers.map((header) => {
+                            return (
+                              <th
+                                key={header.id}
+                                colSpan={header.colSpan}
+                                className="px-6 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                               >
-                                <span>
+                                {header.isPlaceholder ? null : (
+                                  <div
+                                    {...{
+                                      className: header.column.getCanSort()
+                                        ? "cursor-pointer select-none"
+                                        : "",
+                                      onClick:
+                                        header.column.getToggleSortingHandler(),
+                                    }}
+                                  >
+                                    <span>
+                                      {flexRender(
+                                        header.column.columnDef.header,
+                                        header.getContext()
+                                      )}
+                                    </span>
+                                    {{
+                                      asc: (
+                                        <span className="inline-flex self-auto">
+                                          <ChevronDoubleDownIcon
+                                            className="ml-1 h-3 w-3 inline-block text-red-500"
+                                            aria-hidden="true"
+                                          />
+                                        </span>
+                                      ),
+                                      desc: (
+                                        <span className="inline-flex self-auto">
+                                          <ChevronDoubleUpIcon
+                                            className="ml-1 h-3 w-3 inline-block text-green-500"
+                                            aria-hidden="true"
+                                          />
+                                        </span>
+                                      ),
+                                    }[header.column.getIsSorted()] ?? null}
+                                  </div>
+                                )}
+                                {header.column.getCanFilter() ? (
+                                  <div className="py-2">
+                                    <Filter
+                                      column={header.column}
+                                      table={table}
+                                    />
+                                  </div>
+                                ) : null}
+                              </th>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {table.getRowModel().rows.map((row) => {
+                        return (
+                          <tr key={row.id}>
+                            {row.getVisibleCells().map((cell) => {
+                              return (
+                                <td
+                                  key={cell.id}
+                                  className="px-6 py-2 whitespace-nowrap"
+                                >
                                   {flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
+                                    cell.column.columnDef.cell,
+                                    cell.getContext()
                                   )}
-                                </span>
-                                {{
-                                  asc: (
-                                    <span className="inline-flex self-auto">
-                                      <ChevronDoubleDownIcon
-                                        className="ml-1 h-3 w-3 inline-block text-red-500"
-                                        aria-hidden="true"
-                                      />
-                                    </span>
-                                  ),
-                                  desc: (
-                                    <span className="inline-flex self-auto">
-                                      <ChevronDoubleUpIcon
-                                        className="ml-1 h-3 w-3 inline-block text-green-500"
-                                        aria-hidden="true"
-                                      />
-                                    </span>
-                                  ),
-                                }[header.column.getIsSorted()] ?? null}
-                              </div>
-                            )}
-                            {header.column.getCanFilter() ? (
-                              <div className="py-2">
-                                <Filter column={header.column} table={table} />
-                              </div>
-                            ) : null}
-                          </th>
+                                </td>
+                              );
+                            })}
+                          </tr>
                         );
                       })}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {table.getRowModel().rows.map((row) => {
-                    return (
-                      <tr key={row.id}>
-                        {row.getVisibleCells().map((cell) => {
-                          return (
-                            <td
-                              key={cell.id}
-                              className="px-6 py-2 whitespace-nowrap"
-                            >
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              {/* Pagination */}
-              <div className="px-6 py-2 flex items-center justify-between">
-                <div className="flex-1 flex justify-between sm:hidden ">
-                  <Button
-                    onClick={() => table.previousPage()}
-                    disabled={!table.canPreviousPage}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    onClick={() => table.nextPage()}
-                    disabled={!table.canNextPage}
-                  >
-                    Next
-                  </Button>
-                </div>
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                  <div className="flex gap-x-2 min-w-min whitespace-nowrap place-items-center">
-                    <p className="mt-1 text-sm text-gray-700">
-                      Page{" "}
-                      <span className="font-medium">
-                        {table.getState().pagination.pageIndex + 1}
-                      </span>{" "}
-                      of{" "}
-                      <span className="font-medium">
-                        {table.getPageCount()}
-                      </span>
-                    </p>
-                    <select
-                      value={table.getState().pagination.pageSize}
-                      onChange={(e) => {
-                        table.setPageSize(Number(e.target.value));
-                      }}
-                      className="block text-gray-700 w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    >
-                      {[10, 20, 30, 40, 50].map((pageSize) => (
-                        <option key={pageSize} value={pageSize}>
-                          Show {pageSize}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <nav
-                      className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                      aria-label="Pagination"
-                    >
-                      <PageButton
-                        className="rounded-l-md"
-                        onClick={() => table.setPageIndex(0)}
-                        disabled={!table.getCanPreviousPage()}
-                      >
-                        <span className="sr-only">First</span>
-                        <ChevronDoubleLeftIcon
-                          className="h-5 w-5"
-                          aria-hidden="true"
-                        />
-                      </PageButton>
-                      <PageButton
+                    </tbody>
+                  </table>
+
+                  <div className="px-6 py-2 flex items-center justify-between">
+                    <div className="flex-1 flex justify-between sm:hidden ">
+                      <Button
                         onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
+                        disabled={!table.canPreviousPage}
                       >
-                        <span className="sr-only">Previous</span>
-                        <ChevronLeftIcon
-                          className="h-5 w-5"
-                          aria-hidden="true"
-                        />
-                      </PageButton>
-                      <PageButton
+                        Previous
+                      </Button>
+                      <Button
                         onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
+                        disabled={!table.canNextPage}
                       >
-                        <span className="sr-only">Next</span>
-                        <ChevronRightIcon
-                          className="h-5 w-5"
-                          aria-hidden="true"
-                        />
-                      </PageButton>
-                      <PageButton
-                        className="rounded-r-md"
-                        onClick={() =>
-                          table.setPageIndex(table.getPageCount() - 1)
-                        }
-                        disabled={!table.getCanNextPage()}
-                      >
-                        <span className="sr-only">Last</span>
-                        <ChevronDoubleRightIcon
-                          className="h-5 w-5"
-                          aria-hidden="true"
-                        />
-                      </PageButton>
-                    </nav>
+                        Next
+                      </Button>
+                    </div>
+                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                      <div className="flex gap-x-2 min-w-min whitespace-nowrap place-items-center">
+                        <p className="mt-1 text-sm text-gray-700">
+                          Page{" "}
+                          <span className="font-medium">
+                            {table.getState().pagination.pageIndex + 1}
+                          </span>{" "}
+                          of{" "}
+                          <span className="font-medium">
+                            {table.getPageCount()}
+                          </span>
+                        </p>
+                        <select
+                          value={table.getState().pagination.pageSize}
+                          onChange={(e) => {
+                            table.setPageSize(Number(e.target.value));
+                          }}
+                          className="block text-gray-700 text-sm w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        >
+                          {[10, 20, 30, 40, 50].map((pageSize) => (
+                            <option key={pageSize} value={pageSize}>
+                              Show {pageSize}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <nav
+                          className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                          aria-label="Pagination"
+                        >
+                          <PageButton
+                            className="rounded-l-md"
+                            onClick={() => table.setPageIndex(0)}
+                            disabled={!table.getCanPreviousPage()}
+                          >
+                            <span className="sr-only">First</span>
+                            <ChevronDoubleLeftIcon
+                              className="h-5 w-5"
+                              aria-hidden="true"
+                            />
+                          </PageButton>
+                          <PageButton
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                          >
+                            <span className="sr-only">Previous</span>
+                            <ChevronLeftIcon
+                              className="h-5 w-5"
+                              aria-hidden="true"
+                            />
+                          </PageButton>
+                          <PageButton
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                          >
+                            <span className="sr-only">Next</span>
+                            <ChevronRightIcon
+                              className="h-5 w-5"
+                              aria-hidden="true"
+                            />
+                          </PageButton>
+                          <PageButton
+                            className="rounded-r-md"
+                            onClick={() =>
+                              table.setPageIndex(table.getPageCount() - 1)
+                            }
+                            disabled={!table.getCanNextPage()}
+                          >
+                            <span className="sr-only">Last</span>
+                            <ChevronDoubleRightIcon
+                              className="h-5 w-5"
+                              aria-hidden="true"
+                            />
+                          </PageButton>
+                        </nav>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
               {/* ---Pagination */}
             </div>
           </div>
