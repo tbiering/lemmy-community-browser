@@ -289,13 +289,13 @@ function Table() {
                     <div className="flex-1 flex justify-between sm:hidden ">
                       <Button
                         onClick={() => table.previousPage()}
-                        disabled={!table.canPreviousPage}
+                        disabled={!table.getCanPreviousPage()}
                       >
                         Previous
                       </Button>
                       <Button
                         onClick={() => table.nextPage()}
-                        disabled={!table.canNextPage}
+                        disabled={!table.getCanNextPage()}
                       >
                         Next
                       </Button>
