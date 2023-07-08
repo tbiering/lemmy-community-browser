@@ -36,4 +36,4 @@ Deployment artifacts are placed in `dist/`.
 
 ### Deploy to GitHub pages
 
-Automatically using GitHub Actions defined in `.github/workflows/vite.yml`
+Automatically using GitHub Actions defined in `.github/workflows/deploy.yml`
