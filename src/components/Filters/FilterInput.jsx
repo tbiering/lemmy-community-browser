@@ -1,4 +1,4 @@
-function Filter({ column, table }) {
+function FilterInput({ column, table }) {
   const firstValue = table
     .getPreFilteredRowModel()
     .flatRows[0]?.getValue(column.id);
@@ -57,4 +57,4 @@ function Filter({ column, table }) {
   );
 }
 
-export default Filter;
+export default FilterInput;

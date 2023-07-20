@@ -8,6 +8,18 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { Button, PageButton } from "./Pagination/PaginationButtons";
+import CellBoolean from "./Cells/CellBoolean";
+import CellCommunity from "./Cells/CellCommunity";
+import CellDefault from "./Cells/CellDefault";
+import CellNumber from "./Cells/CellNumber";
+import CellLink from "./Cells/CellLink";
+import FilterInput from "./Filters/FilterInput";
+import { nameFilter, nsfwFilter } from "./Filters/filterFunctions";
+import { nameSort } from "./Sorting/sortFunctions";
+
+import { numberWithCommas } from "../utils/helpers";
+
 import {
   ChevronDoubleLeftIcon,
   ChevronLeftIcon,
@@ -17,51 +29,11 @@ import {
   ChevronDoubleUpIcon,
   ArrowPathIcon,
 } from "@heroicons/react/20/solid";
-import { Button, PageButton } from "./PaginationButtons";
-import BooleanDisplay from "./BooleanDisplay";
-import Filter from "./Filter";
-
-import CellCommunity from "./CellCommunity";
-import CellDefault from "./CellDefault";
-import CellNumber from "./CellNumber";
 
 function Table() {
   const [data, setData] = useState([]);
-  const [sorting, setSorting] = useState([{ id: "subscribers", desc: true }]);
   const [loading, setLoading] = useState(true);
-
-  const nameSort = (rowA, rowB) => {
-    let dir = 1;
-    // Sort alphabetically by name
-    dir = rowA.original.community.name > rowB.original.community.name ? 1 : -1;
-    return dir;
-  };
-
-  // Custom filter for name column
-  const nameFilter = (row, columnId, value) => {
-    let content = row.getValue(columnId);
-
-    // If content.title contains value, it's a match
-    if (content.name.toLowerCase().includes(value.toLowerCase())) {
-      return true;
-    }
-
-    if (content.title.toLowerCase().includes(value.toLowerCase())) {
-      return true;
-    }
-    return false;
-  };
-
-  // Custom filter for nsfw column
-  const nsfwFilter = (row, columnId, value) => {
-    return row.getValue(columnId).toString() === value;
-  };
-
-  // Custom formatting for numbers
-  function numberWithCommas(x) {
-    // RegEx for number formatting? Browser compatibility issues -> https://stackoverflow.com/questions/2901102/how-to-format-a-number-with-commas-as-thousands-separators
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
+  const [sorting, setSorting] = useState([{ id: "subscribers", desc: true }]);
 
   const columns = useMemo(
     () => [
@@ -83,14 +55,17 @@ function Table() {
             id: "actor_id",
             header: () => "URL",
             accessorFn: (row) => row.community.actor_id,
+            cell: (info) => <CellLink value={info.getValue()} />,
+            /*
             cell: (info) => <CellDefault value={info.getValue()} />,
+            */
             footer: (props) => props.column.id,
           },
           {
             id: "nsfw",
             header: () => "NSFW",
             accessorFn: (row) => row.community.nsfw,
-            cell: (info) => <BooleanDisplay value={info.getValue()} />,
+            cell: (info) => <CellBoolean value={info.getValue()} />,
             footer: (props) => props.column.id,
             filterFn: nsfwFilter,
             sortType: "basic",
@@ -174,6 +149,7 @@ function Table() {
         <div className="-my-2 overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8">
           <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
             <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+              {/* Loading state */}
               {loading && (
                 <div className="text-center p-20 text-gray-900">
                   <ArrowPathIcon
@@ -184,6 +160,7 @@ function Table() {
                 </div>
               )}
 
+              {/* Data loaded state */}
               {!loading && (
                 <>
                   <table className="min-w-full divide-y divide-gray-200 border-b border-gray-200">
@@ -240,7 +217,7 @@ function Table() {
                                 )}
                                 {header.column.getCanFilter() ? (
                                   <div className="py-2">
-                                    <Filter
+                                    <FilterInput
                                       column={header.column}
                                       table={table}
                                     />
@@ -270,7 +247,7 @@ function Table() {
                                 return (
                                   <td
                                     key={cell.id}
-                                    className="px-6 py-2 whitespace-pre-wrap"
+                                    className="px-4 py-2 whitespace-pre-wrap"
                                   >
                                     {flexRender(
                                       cell.column.columnDef.cell,
@@ -285,6 +262,7 @@ function Table() {
                     </tbody>
                   </table>
 
+                  {/* Pagination */}
                   <div className="px-3 py-2 flex items-center justify-between">
                     <div className="flex-1 flex justify-between sm:hidden ">
                       <Button
@@ -379,14 +357,13 @@ function Table() {
                       </div>
                     </div>
                   </div>
+                  {/* ---Pagination */}
                 </>
               )}
-              {/* ---Pagination */}
             </div>
           </div>
         </div>
       </div>
-      {/* Pagination */}
     </>
   );
 }
