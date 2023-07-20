@@ -27,7 +27,7 @@ import CellNumber from "./CellNumber";
 
 function Table() {
   const [data, setData] = useState([]);
-  const [sorting, setSorting] = useState([]);
+  const [sorting, setSorting] = useState([{ id: "subscribers", desc: true }]);
   const [loading, setLoading] = useState(true);
 
   const nameSort = (rowA, rowB) => {
