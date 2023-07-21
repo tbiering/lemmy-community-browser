@@ -43,12 +43,12 @@ jobs:
         run: npm install
       - name: Build
         run: npm run build
-      - name: Get current date
+      - name: Get current date for cache busting
         id: date
-        run: echo "::set-output name=date::$(date +'%s')"
+        run: echo "date=$(date +'%s')" >> $GITHUB_ENV
       - name: Download updated communities file
         run: |
-          curl -o ${{ github.workspace }}/dist/communities.json https://browse.feddit.de/communities.json?nocache=${{ steps.date.outputs.date }}
+          curl -o ${{ github.workspace }}/dist/communities.json https://browse.feddit.de/communities.json?nocache=${{ env.date }}
         shell: bash
       - name: Setup Pages
         uses: actions/configure-pages@v3
