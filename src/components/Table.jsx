@@ -28,6 +28,7 @@ import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
   ArrowPathIcon,
+  ChevronUpDownIcon,
 } from "@heroicons/react/20/solid";
 
 function Table() {
@@ -56,9 +57,6 @@ function Table() {
             header: () => "URL",
             accessorFn: (row) => row.community.actor_id,
             cell: (info) => <CellLink value={info.getValue()} />,
-            /*
-            cell: (info) => <CellDefault value={info.getValue()} />,
-            */
             footer: (props) => props.column.id,
           },
           {
@@ -69,9 +67,6 @@ function Table() {
             footer: (props) => props.column.id,
             filterFn: nsfwFilter,
             sortType: "basic",
-            /*
-            enableColumnFilter: false,
-            */
           },
         ],
       },
@@ -164,6 +159,7 @@ function Table() {
               {!loading && (
                 <>
                   <table className="min-w-full divide-y divide-gray-200 border-b border-gray-200">
+                    {/* Table Header */}
                     <thead className="bg-gray-50">
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
@@ -183,7 +179,7 @@ function Table() {
                                   <div
                                     {...{
                                       className: header.column.getCanSort()
-                                        ? "cursor-pointer select-none"
+                                        ? "cursor-pointer select-none inline-flex items-center"
                                         : "font-bold tracking-widest",
                                       onClick:
                                         header.column.getToggleSortingHandler(),
@@ -195,9 +191,10 @@ function Table() {
                                         header.getContext()
                                       )}
                                     </span>
+                                    {/* Sorting Icons */}
                                     {{
                                       asc: (
-                                        <span className="inline-flex self-auto">
+                                        <span className="inline-flex">
                                           <ChevronDoubleDownIcon
                                             className="ml-1 h-3 w-3 inline-block text-red-500"
                                             aria-hidden="true"
@@ -205,7 +202,7 @@ function Table() {
                                         </span>
                                       ),
                                       desc: (
-                                        <span className="inline-flex self-auto">
+                                        <span className="inline-flex">
                                           <ChevronDoubleUpIcon
                                             className="ml-1 h-3 w-3 inline-block text-green-500"
                                             aria-hidden="true"
@@ -213,8 +210,23 @@ function Table() {
                                         </span>
                                       ),
                                     }[header.column.getIsSorted()] ?? null}
+                                    {{
+                                      true: (
+                                        <span className="inline-flex">
+                                          <ChevronUpDownIcon
+                                            className="ml-1 h-3 w-3 inline-block text-gray-500"
+                                            aria-hidden="true"
+                                          />
+                                        </span>
+                                      ),
+                                    }[
+                                      !header.column.getIsSorted() &&
+                                        header.column.getCanSort()
+                                    ] ?? null}
+                                    {/* ---Sorting Icons */}
                                   </div>
                                 )}
+                                {/* Filter */}
                                 {header.column.getCanFilter() ? (
                                   <div className="py-2">
                                     <FilterInput
@@ -223,12 +235,15 @@ function Table() {
                                     />
                                   </div>
                                 ) : null}
+                                {/* ---Filter */}
                               </th>
                             );
                           })}
                         </tr>
                       ))}
                     </thead>
+                    {/* ---Table Header */}
+                    {/* Table Body */}
                     <tbody className="bg-white divide-y divide-gray-200">
                       {table.getRowModel().rows.map((row) => {
                         return (
@@ -260,6 +275,7 @@ function Table() {
                         );
                       })}
                     </tbody>
+                    {/* ---Table Body */}
                   </table>
 
                   {/* Pagination */}
