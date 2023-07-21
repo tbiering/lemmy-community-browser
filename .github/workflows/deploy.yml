@@ -43,9 +43,12 @@ jobs:
         run: npm install
       - name: Build
         run: npm run build
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%s')"
       - name: Download updated communities file
         run: |
-          curl -o ${{ github.workspace }}/dist/communities.json https://browse.feddit.de/communities.json?nocache=$(date +%s)
+          curl -o ${{ github.workspace }}/dist/communities.json https://browse.feddit.de/communities.json?nocache=${{ steps.date.outputs.date }}
         shell: bash
       - name: Setup Pages
         uses: actions/configure-pages@v3
